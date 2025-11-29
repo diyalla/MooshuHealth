@@ -7,14 +7,17 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-// Connect to local MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/mooshu', {
+// 🔥 MONGO ATLAS STRING (USE YOURS)
+const MONGO_URI = 'mongodb+srv://mooshu:Mooshu123@cluster0.pwavdl1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+
+mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+})
+.then(() => console.log('MongoDB connected to Atlas'))
+.catch(err => console.log('MongoDB connection error:', err));
 
-// Patient Schema 
+// UPDATED SCHEMA (critical added)
 const patientSchema = new mongoose.Schema({
   firstName: String,
   lastName: String,
@@ -22,25 +25,24 @@ const patientSchema = new mongoose.Schema({
   gender: String,
   contactNumber: String,
   medicalId: String,
+  critical: Boolean,    // 🔥 NEW FIELD
   records: [{
     diagnosis: String,
     admitted: Boolean,
     admittedDays: Number,
     discharged: Boolean,
     medication: String,
-    // NEW FIELDS:
-    testsDone: Boolean,       // yes/no
-    testsDetails: String,     // free text when yes
-    dateDischarged: String    // string date when discharged = yes
+    testsDone: Boolean,
+    testsDetails: String,
+    dateDischarged: String
   }]
 });
-
 
 const Patient = mongoose.model('Patient', patientSchema);
 
 // Add new patient
 app.post('/patients', async (req, res) => {
-    const { firstName, lastName, medicalId } = req.body;
+    const { medicalId } = req.body;
     const exists = await Patient.findOne({ medicalId });
     if (exists) return res.status(400).json({ message: 'Patient already added' });
 
@@ -49,12 +51,12 @@ app.post('/patients', async (req, res) => {
     res.json({ message: 'Patient added successfully' });
 });
 
-// Get all patients OR search for one
+// Get all patients OR search
 app.get('/patients', async (req, res) => {
     const search = req.query.search;
 
     if (search) {
-        const regex = new RegExp(search, 'i'); // case insensitive search
+        const regex = new RegExp(search, 'i');
         const patients = await Patient.find({
             $or: [
                 { firstName: regex },
@@ -65,11 +67,9 @@ app.get('/patients', async (req, res) => {
         return res.json(patients);
     }
 
-    // If no search query was provided return all patients
     const patients = await Patient.find();
     res.json(patients);
 });
-
 
 // Add patient record
 app.post('/patients/:id/record', async (req, res) => {
@@ -90,6 +90,5 @@ app.delete('/patients/:id', async (req, res) => {
   await Patient.findByIdAndDelete(req.params.id);
   res.json({ message: 'Patient deleted successfully' });
 });
-
 
 app.listen(5000, () => console.log('Server running on port 5000'));
