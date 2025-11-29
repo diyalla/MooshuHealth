@@ -1,7 +1,8 @@
 // screens/HomeScreen.js
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';   // ⭐ ADDED
 
 const API_BASE = 'http://192.168.2.129:5000';
 
@@ -14,6 +15,13 @@ export default function HomeScreen({ navigation }) {
   const [criticalCount, setCriticalCount] = useState(0);
   const [femaleCount, setFemaleCount] = useState(0);
   const [maleCount, setMaleCount] = useState(0);
+
+  // ⭐ Refresh analytics every time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      loadAnalytics();
+    }, [])
+  );
 
   useEffect(() => {
     loadAnalytics();
