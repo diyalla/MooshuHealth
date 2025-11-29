@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // 🔥 MONGO ATLAS STRING (USE YOURS)
-const MONGO_URI = 'mongodb+srv://mooshu:Mooshu123@cluster0.pwavdl1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const MONGO_URI = 'mongodb+srv://<db_username>:<db_password>@cluster0.pwavdl1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
